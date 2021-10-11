@@ -1,44 +1,52 @@
 import argparse
 import json
+import datetime
 import torch
 import torch.nn as nn
 from model import LSTM_model
 from scipy.io.wavfile import write
-import datetime
+import librosa
+from utils import bandpass_filter, compute_spectral_coherence
 
 
 
 
 if __name__ == '__main__':
 
-    parser = argparse.ArgumentParser(description='Configuration file...')
-    parser.add_argument('Config_file',
-                        metavar='PATH',
-                        type=str,
-                        help='the path to file containing configuration')
-    args = parser.parse_args()
+    # parser = argparse.ArgumentParser(description='Configuration file...')
+    # parser.add_argument('Config_file',
+    #                     metavar='PATH',
+    #                     type=str,
+    #                     help='the path to file containing configuration')
+    # args = parser.parse_args()
 
-    f = open(args.Config_file)
-
+    # f = open(args.Config_file)
+    f = open("config.json5")
     config = json.load(f)
     print(config)
     
     # Create model
+    device = config["device"]
     model_config = config["model"]
     model = LSTM_model(model_config[0], model_config[0], device)
 
     # Load data    
-    noisy_f_name = str(test_path_folder + test_f_paths[idx])
+    noisy_f_name = "AiStethRecording-8BL5_7.1_s2.wav"
     noisy_y, _ = librosa.load(noisy_f_name, sr=4096)
     noisy_y = bandpass_filter(noisy_y)
     
     # Feature extraction
-    fs = 4096
+    specs = config["specs"][0]
+    fs = specs["fs"]
+    win_length = specs["win_length"]
+    hop_length = specs["hop_length"]
+    n_fft = specs["n_fft"]
     C, _ = compute_spectral_coherence(noisy_f_name, fs, win_length, hop_length, n_fft, device)
-    noisy_y = noisy_y.reshape(-1).numpy()
+    C = C.unsqueeze(0)
+    noisy_y = noisy_y.reshape(-1)
     # noisy_y = bandpass_filter(noisy_y)
     noisy_mag, noisy_phase = librosa.magphase(librosa.stft(noisy_y, n_fft=2048, hop_length=64, win_length=512))
-    noisy_mag_tensor = torch.tensor(noisy_mag.T, device=self.device, dtype=torch.float32).unsqueeze(0) # (batch_size, T, F)
+    noisy_mag_tensor = torch.tensor(noisy_mag.T, device=device, dtype=torch.float32).unsqueeze(0) # (batch_size, T, F)
     assert noisy_mag_tensor.dim() == 3
     
     pred_mask, attention_vector = model(C, noisy_mag_tensor)
