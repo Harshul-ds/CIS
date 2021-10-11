@@ -14,7 +14,7 @@ import matplotlib.pyplot as plt
     
 class attentionLayer(nn.Module):
     def __init__(self, c_dim, n_frames, device):
-        super(conv_attentionLayer, self).__init__()
+        super(attentionLayer, self).__init__()
                 
         self.c_dim = c_dim # context vector dimension
         self.softmax = nn.Softmax(dim=1)  # softmax layer to calculate weights
@@ -32,7 +32,7 @@ class attentionLayer(nn.Module):
 
 class LSTM_model(nn.Module):
   def __init__(self, encoder_opt, decoder_opt, device, phase='train'):
-    super(LSTMLayer, self).__init__()
+    super(LSTM_model, self).__init__()
     self.n_layers = decoder_opt['n_layers']
     self.n_frames = encoder_opt['n_frames']
     self.in_dim = decoder_opt['in_dim']
@@ -44,7 +44,7 @@ class LSTM_model(nn.Module):
     self.scale = torch.sqrt(torch.FloatTensor([self.hid_dim]))
     self.LSTM_layer1 = nn.LSTM(self.in_dim+self.c_dim, self.hid_dim, bias=True) # decoding RNNlayer
     self.LSTM_layer2 = nn.LSTM(self.hid_dim+self.c_dim, self.out_dim, bias=True) # decoding RNNlayer
-    self.attention_LSTM = conv_attentionLayer(self.c_dim, self.n_frames, device)
+    self.attention_LSTM = attentionLayer(self.c_dim, self.n_frames, device)
     self.fc_out = nn.Linear(self.hid_dim, self.out_dim)    
     # self.dropout = nn.Dropout(dropout)
     self.sigmoid = nn.Sigmoid()
@@ -74,10 +74,10 @@ class LSTM_model(nn.Module):
     
     att_seq = self.attention_LSTM(C)
 
-    enc_seq, (h_t1, c_t1) = self.LSTM_layer1(inp_seq, (h_t1, c_t1))    
+    enc_seq, (h_t1, c_t1) = self.LSTM_layer1(torch.cat((inp_seq, att_seq), -1), (h_t1, c_t1))    
     out_seq, (h_t2, c_t2) = self.LSTM_layer2(torch.cat((enc_seq, att_seq), -1), (h_t2, c_t2))
 
-    predictions = F.softmax(predictions, dim = -1)
+    # predictions = F.softmax(predictions, dim = -1)
     
     
     return out_seq, att_seq
