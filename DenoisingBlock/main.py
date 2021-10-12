@@ -29,6 +29,10 @@ if __name__ == '__main__':
     device = config["device"]
     model_config = config["model"]
     model = LSTM_model(model_config[0], model_config[0], device)
+    # to load
+    checkpoint = torch.load('latest_model.pt')
+    model.load_state_dict(checkpoint['state_dict'])
+
 
     # Load data    
     noisy_f_name = "AiStethRecording-8BL5_7.1_s2.wav"
