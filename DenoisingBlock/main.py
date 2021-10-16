@@ -35,7 +35,7 @@ if __name__ == '__main__':
 
 
     # Load data    
-    noisy_f_name = "AiStethRecording-8BL5_7.1_s2.wav"
+    noisy_f_name = "individualAudio.wav"
     noisy_y, _ = librosa.load(noisy_f_name, sr=4096)
     noisy_y = bandpass_filter(noisy_y)
     
@@ -63,7 +63,7 @@ if __name__ == '__main__':
     min_len = min(len(noisy_y), len(pred_clean_y_s))
     noisy_y = noisy_y[:min_len]
     pred_clean_y = pred_clean_y_s[:min_len]
-    write('predicted_output.wav', fs, pred_clean_y)  # Save as WAV file 
+    write('individualAudio_c.wav', fs, pred_clean_y)  # Save audio file 
     
 
     
