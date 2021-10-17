@@ -13,23 +13,22 @@ def dp_prog(lp_res,avg,delta):
     cost_sig = np.zeros((len(lp_res), ))
     loc_sig = np.zeros((len(lp_res), ))
     cost = np.zeros((lmax-lmin+1, ))
-    for i in range(lmax+1, len(lp_res)):
+    for i in range(lmax, len(lp_res)):
         for j in range(lmin, lmax):
             cost[j-lmin] = cost_sig[i-j]-lamb*lp_res[i-j]
         l1 = np.argwhere(cost == np.min(cost))
-        loc_sig[i] = i-lmin-l1[0]+1
+        loc_sig[i] = i-lmin-l1[0]
         cost_sig[i] = np.min(cost)
 
     k = 0
-    last_sig = np.array([cost_sig[np.max(np.clip(np.arange(len(cost_sig)-2*lmax,
-                                                 len(cost_sig)), 0, np.inf)).astype(np.int)]])
-    l12 = np.argwhere(last_sig == np.min(last_sig))[0]
+    last_sig = cost_sig[max(0, len(cost_sig)-2*lmax): len(cost_sig)]
+    l12 = np.argwhere(last_sig == np.min(last_sig)).reshape(-1)
     last_loc = len(cost_sig)-2*lmax+l12[0]-1
     indices = np.array([last_loc], dtype=np.int)
     while k == 0:
-        if loc_sig[indices[0]]<lmax+20000:
+        if loc_sig[indices[0]]<lmax+20:
             break
-        indices = np.append(indices, loc_sig[indices[0]].astype(np.int))
+        indices = np.concatenate(([loc_sig[indices[0]].astype(np.int64)], indices))
 
     gci = np.zeros((len(lp_res),))
     gci[indices] = 1
@@ -66,8 +65,8 @@ def dp_prog(lp_res,avg,delta):
 
     if s2loc>0:
         indices_s1 = indices; indices_s2 = indices+s2loc
-        indices_s2 = indices_s2[indices_s2>len(lp_res)]
-        indices_s2 = indices_s2[indices_s2<0]
+        indices_s2 = indices_s2[indices_s2<len(lp_res)]
+        indices_s2 = indices_s2[indices_s2>0]
     else:
         indices_s2 = indices; indices_s1 = indices+s2loc
         indices_s1 = indices_s1[indices_s1<len(lp_res)]

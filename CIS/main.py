@@ -7,6 +7,8 @@ from utils.cal_steng import cal_steng
 from utils.location_postprocess import location_postprocess
 from dp_prog import dp_prog
 import matplotlib.pyplot as plt
+from scipy.io import wavfile
+import scipy.io
 
 def estimate_s1s2(y,
                   FS = 2000,
@@ -35,9 +37,9 @@ def estimate_s1s2(y,
 #     #     disp(['Segment starting at ' num2str(i/FS) 'sec']);
 #     sigseg = sig[i: i + wlen - 1]
     sigseg = sig
-    # HRP, HR = gethr(sigseg,FS,F0)
-    # HRP_all = np.concat((HRP_all, HRP), -1)
-    HRP = 1.2
+    HRP, HR = gethr(sigseg,FS,F0)
+    HRP_all = np.concatenate((HRP_all, [HRP]), -1)
+
     sigseg = np.concatenate((np.zeros((np.int(HRP*FS),)),sigseg), -1)
     st_eng = cal_steng(sigseg, st_Nlen, st_Nshift)
     #     PitchPeriod_inFrames = np.round(2*HRP/st_winshift)
@@ -68,8 +70,14 @@ if __name__ == '__main__':
     # Load data
     noisy_f_name  =  "AiStethRecording-8BL5_7.1_s2.wav"
     noisy_y, _  =  librosa.load(noisy_f_name, sr = 2000)
+    
     S1_locations_final, S2_locations_final = estimate_s1s2(noisy_y)
-    plt.scatter(S1_locations_final, noisy_y[S1_locations_final])
+    plt.figure()
+    plt.plot(np.arange(len(noisy_y))/2000, noisy_y)
+    plt.scatter(S1_locations_final, 0.2*np.ones((len(S1_locations_final),)), color='red')
+    plt.scatter(S2_locations_final, 0.2*np.ones((len(S2_locations_final),)), color='purple')
+    plt.show()
+    # plt.scatter(S1_locations_final, noisy_y[S1_locations_final])
     
 
     

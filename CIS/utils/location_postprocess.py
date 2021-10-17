@@ -1,9 +1,9 @@
-
+import numpy as np
 
 def location_postprocess(locations, estHRP, flag=0):
     i=0
     count=0
-    locations_final = []
+    locations_final = np.zeros((len(locations),))
     while i<len(locations)-1:
         if (locations[i+1]-locations[i])>estHRP:
             locations_final[count]=locations[i]
