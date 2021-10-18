@@ -5,4 +5,6 @@
 4. The denoised audio is saved as 'IndividualAudio_c.wav'
 
 
-# python
+# python_scripts
+The repository contains the Conveted files for the CIS algorithm. 
+1. Sample audio file: 
